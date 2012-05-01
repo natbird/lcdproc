@@ -3,6 +3,7 @@ import urllib
 import select
 
 from screen import Screen
+from menu import Menu
 
 
 class Server(object):
@@ -19,8 +20,9 @@ class Server(object):
         self.tn = telnetlib.Telnet(self.hostname, self.port)
         self.server_info = dict()
         self.screens = dict()
+        self.menus = dict()
         self.keys = list()
-                
+    
     def start_session(self):
         
         """ Start Session """
@@ -37,7 +39,15 @@ class Server(object):
         })                
         return response  
         
-                
+        
+    def set_name(self, name):
+		
+        """ Set Client Name """
+        
+        self.name = name
+        self.request("client_set name %s" % (self.name))
+
+
     def request(self, command_string):
         
         """ Request """
@@ -83,6 +93,15 @@ class Server(object):
             screen.clear()              # TODO Check this is needed, new screens should be clear.
             self.screens[ref] = screen
             return self.screens[ref]
+
+    def add_menuItem(self, ref, item, text, parent="\"\""):     
+        
+        """ Add Menu Item """
+        
+        if ref not in self.menus:   
+            menu = Menu(self, ref, item, text, parent)
+            self.menus[ref] = menu
+            return self.menus[ref]
      
 
     def del_screen(self, ref):
@@ -118,7 +137,7 @@ class Server(object):
             if "success" in response:
                 return None
             else:
-                return response
+                return response    
             
 
     def output(self, value):
